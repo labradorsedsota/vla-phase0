@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown → 公众号排版</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #1a73e8;
+            --bg-color: #f5f5f7;
+            --card-bg: #ffffff;
+            --border-color: #e5e5e5;
+            --text-color: #1d1d1f;
+            --text-secondary: #86868b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            background: rgba(255,255,255,0.9);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .header-title svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .control-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        select, input[type="color"] {
+            padding: 6px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            font-size: 13px;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        select:hover, input[type="color"]:hover {
+            border-color: var(--primary-color);
+        }
+
+        input[type="color"] {
+            width: 36px;
+            height: 32px;
+            padding: 2px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: #eaeaea;
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            display: flex;
+            padding: 16px;
+            gap: 16px;
+            overflow: hidden;
+        }
+
+        .panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .panel-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Editor Panel */
+        .editor-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .line-numbers {
+            padding: 16px 0;
+            background: #fafafa;
+            border-right: 1px solid var(--border-color);
+            text-align: right;
+            font-family: "SF Mono", "Fira Code", "Monaco", monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #999;
+            user-select: none;
+            overflow: hidden;
+            min-width: 45px;
+        }
+
+        .line-numbers div {
+            padding: 0 12px;
+        }
+
+        .editor {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            outline: none;
+            resize: none;
+            font-family: "SF Mono", "Fira Code", "Monaco", monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            background: transparent;
+            color: var(--text-color);
+            overflow: auto;
+        }
+
+        .editor::placeholder {
+            color: #ccc;
+        }
+
+        /* Drop Zone */
+        .drop-zone {
+            position: absolute;
+            inset: 0;
+            background: rgba(26, 115, 232, 0.1);
+            border: 2px dashed var(--primary-color);
+            border-radius: 8px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--primary-color);
+            pointer-events: none;
+        }
+
+        .drop-zone.active {
+            display: flex;
+        }
+
+        /* Preview Panel */
+        .preview-container {
+            flex: 1;
+            overflow: auto;
+            background: #f9f9f9;
+            display: flex;
+            justify-content: center;
+        }
+
+        .preview-content {
+            width: 100%;
+            max-width: 590px;
+            padding: 24px;
+            background: white;
+            min-height: 100%;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Hidden file input */
+        .file-input {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main {
+                flex-direction: column;
+            }
+
+            .panel {
+                min-height: 40vh;
+            }
+
+            .header {
+                padding: 10px 12px;
+            }
+
+            .header-controls {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .control-label {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            <span>Markdown → 公众号排版</span>
+        </div>
+        <div class="header-controls">
+            <div class="control-group">
+                <span class="control-label">主题</span>
+                <select id="themeSelect">
+                    <option value="default">默认蓝</option>
+                    <option value="minimal">极简黑白</option>
+                    <option value="elegant">优雅紫</option>
+                    <option value="tech">技术绿</option>
+                    <option value="warm">暖色橙</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <span class="control-label">字号</span>
+                <select id="fontSizeSelect">
+                    <option value="14">14px</option>
+                    <option value="15" selected>15px</option>
+                    <option value="16">16px</option>
+                    <option value="17">17px</option>
+                    <option value="18">18px</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <span class="control-label">行高</span>
+                <select id="lineHeightSelect">
+                    <option value="1.6">1.6</option>
+                    <option value="1.75" selected>1.75</option>
+                    <option value="1.8">1.8</option>
+                    <option value="2.0">2.0</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <span class="control-label">主色</span>
+                <input type="color" id="colorPicker" value="#1a73e8">
+            </div>
+            <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                上传
+            </button>
+            <button class="btn btn-primary" id="copyBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                复制
+            </button>
+        </div>
+        <input type="file" id="fileInput" class="file-input" accept=".md,.markdown,.txt">
+    </header>
+
+    <main class="main">
+        <div class="panel">
+            <div class="panel-header">
+                <span>Markdown 编辑器</span>
+                <span style="font-size:12px;color:#999;">支持拖拽上传 .md 文件</span>
+            </div>
+            <div class="editor-container" id="editorContainer">
+                <div class="line-numbers" id="lineNumbers"></div>
+                <textarea class="editor" id="editor" placeholder="在此输入 Markdown 内容，或拖拽上传 .md 文件...
+
+# 标题示例
+
+这是一段正文，支持 **粗体**、*斜体*、`行内代码`。
+
+## 代码块
+
+```javascript
+function hello() {
+    console.log('Hello, World!');
+}
+```
+
+## 引用
+
+> 这是一段引用文字。
+
+## 列表
+
+- 项目一
+- 项目二
+- 项目三
+
+## 表格
+
+| 姓名 | 年龄 | 城市 |
+|------|------|------|
+| 张三 | 25   | 北京 |
+| 李四 | 30   | 上海 |
+
+## 链接
+
+访问 [Google](https://google.com) 和 [GitHub](https://github.com)。"></textarea>
+                <div class="drop-zone" id="dropZone">松开以上传文件</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <span>公众号预览</span>
+                <span style="font-size:12px;color:#999;">宽度 590px</span>
+            </div>
+            <div class="preview-container">
+                <div class="preview-content" id="preview"></div>
+            </div>
+        </div>
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Theme configurations
+        const themes = {
+            default: {
+                primary: '#1a73e8',
+                codeBg: '#1e1e1e',
+                codeText: '#d4d4d4',
+                codeLight: false
+            },
+            minimal: {
+                primary: '#333333',
+                codeBg: '#f6f8fa',
+                codeText: '#24292e',
+                codeLight: true
+            },
+            elegant: {
+                primary: '#8b5cf6',
+                codeBg: '#1e1e1e',
+                codeText: '#d4d4d4',
+                codeLight: false
+            },
+            tech: {
+                primary: '#10b981',
+                codeBg: '#1e1e1e',
+                codeText: '#d4d4d4',
+                codeLight: false
+            },
+            warm: {
+                primary: '#f59e0b',
+                codeBg: '#fffbeb',
+                codeText: '#78350f',
+                codeLight: true
+            }
+        };
+
+        // Syntax highlight color mappings (for inline styles)
+        const hlColorsLight = {
+            'hljs-keyword': '#d73a49',
+            'hljs-string': '#032f62',
+            'hljs-number': '#005cc5',
+            'hljs-function': '#6f42c1',
+            'hljs-title': '#6f42c1',
+            'hljs-params': '#24292e',
+            'hljs-comment': '#6a737d',
+            'hljs-built_in': '#005cc5',
+            'hljs-literal': '#005cc5',
+            'hljs-type': '#d73a49',
+            'hljs-attr': '#005cc5',
+            'hljs-selector-tag': '#22863a',
+            'hljs-selector-class': '#6f42c1',
+            'hljs-selector-id': '#005cc5',
+            'hljs-variable': '#e36209',
+            'hljs-template-variable': '#e36209',
+            'hljs-tag': '#22863a',
+            'hljs-name': '#22863a',
+            'hljs-attribute': '#005cc5',
+            'hljs-regexp': '#032f62',
+            'hljs-link': '#032f62',
+            'hljs-symbol': '#e36209',
+            'hljs-bullet': '#e36209',
+            'hljs-meta': '#6a737d',
+            'hljs-addition': '#22863a',
+            'hljs-deletion': '#b31d28'
+        };
+
+        const hlColorsDark = {
+            'hljs-keyword': '#569cd6',
+            'hljs-string': '#ce9178',
+            'hljs-number': '#b5cea8',
+            'hljs-function': '#dcdcaa',
+            'hljs-title': '#dcdcaa',
+            'hljs-params': '#9cdcfe',
+            'hljs-comment': '#6a9955',
+            'hljs-built_in': '#4ec9b0',
+            'hljs-literal': '#569cd6',
+            'hljs-type': '#4ec9b0',
+            'hljs-attr': '#9cdcfe',
+            'hljs-selector-tag': '#d7ba7d',
+            'hljs-selector-class': '#d7ba7d',
+            'hljs-selector-id': '#d7ba7d',
+            'hljs-variable': '#9cdcfe',
+            'hljs-template-variable': '#9cdcfe',
+            'hljs-tag': '#569cd6',
+            'hljs-name': '#569cd6',
+            'hljs-attribute': '#9cdcfe',
+            'hljs-regexp': '#d16969',
+            'hljs-link': '#ce9178',
+            'hljs-symbol': '#b5cea8',
+            'hljs-bullet': '#6796e6',
+            'hljs-meta': '#9b9b9b',
+            'hljs-addition': '#b5cea8',
+            'hljs-deletion': '#ce9178'
+        };
+
+        // Current settings
+        let settings = {
+            theme: 'default',
+            fontSize: 15,
+            lineHeight: 1.75,
+            primaryColor: '#1a73e8'
+        };
+
+        // Elements
+        const editor = document.getElementById('editor');
+        const preview = document.getElementById('preview');
+        const lineNumbers = document.getElementById('lineNumbers');
+        const themeSelect = document.getElementById('themeSelect');
+        const fontSizeSelect = document.getElementById('fontSizeSelect');
+        const lineHeightSelect = document.getElementById('lineHeightSelect');
+        const colorPicker = document.getElementById('colorPicker');
+        const fileInput = document.getElementById('fileInput');
+        const copyBtn = document.getElementById('copyBtn');
+        const editorContainer = document.getElementById('editorContainer');
+        const dropZone = document.getElementById('dropZone');
+        const toast = document.getElementById('toast');
+
+        // Initialize marked
+        marked.setOptions({
+            breaks: true,
+            gfm: true,
+            highlight: function(code, lang) {
+                if (lang && hljs.getLanguage(lang)) {
+                    try {
+                        return hljs.highlight(code, { language: lang }).value;
+                    } catch (e) {}
+                }
+                return hljs.highlightAuto(code).value;
+            }
+        });
+
+        // Update line numbers
+        function updateLineNumbers() {
+            const lines = editor.value.split('\n');
+            lineNumbers.innerHTML = lines.map((_, i) => `<div>${i + 1}</div>`).join('');
+        }
+
+        // Convert highlight.js classes to inline styles
+        function convertHljsToInline(html, isLight) {
+            const colors = isLight ? hlColorsLight : hlColorsDark;
+            let result = html;
+
+            for (const [className, color] of Object.entries(colors)) {
+                const regex = new RegExp(`class="${className}"`, 'g');
+                result = result.replace(regex, `style="color:${color}"`);
+
+                // Handle multiple classes
+                const multiRegex = new RegExp(`class="([^"]*\\s)?${className}(\\s[^"]*)?"`);
+                result = result.replace(multiRegex, (match, before, after) => {
+                    return `style="color:${color}"`;
+                });
+            }
+
+            // Clean up any remaining hljs classes
+            result = result.replace(/class="hljs[^"]*"/g, '');
+
+            return result;
+        }
+
+        // Extract links and create footnotes
+        function processLinksToFootnotes(html) {
+            const links = [];
+            let counter = 0;
+
+            // Match all anchor tags
+            const processed = html.replace(/<a[^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/gi, (match, url, text) => {
+                // Skip if it's a fragment link or javascript
+                if (url.startsWith('#') || url.startsWith('javascript:')) {
+                    return match;
+                }
+
+                counter++;
+                links.push({ index: counter, url, text });
+
+                return `<span style="color:${settings.primaryColor};border-bottom:1px dashed ${settings.primaryColor};">${text}</span><sup style="font-size:10px;color:${settings.primaryColor};margin-left:2px;">[${counter}]</sup>`;
+            });
+
+            // Add footnotes section if there are links
+            if (links.length > 0) {
+                const footnotes = `
+                    <div style="margin-top:32px;padding-top:16px;border-top:1px solid #eee;">
+                        <p style="font-size:13px;color:#999;margin-bottom:8px;font-weight:500;">参考链接</p>
+                        ${links.map(link => `
+                            <p style="font-size:12px;color:#666;margin:4px 0;word-break:break-all;">
+                                <span style="color:${settings.primaryColor};">[${link.index}]</span> ${link.text}: ${link.url}
+                            </p>
+                        `).join('')}
+                    </div>
+                `;
+                return processed + footnotes;
+            }
+
+            return processed;
+        }
+
+        // Process tables for alternating row colors
+        function processTable(html) {
+            const primaryRgb = hexToRgb(settings.primaryColor);
+            const headerBg = `rgba(${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}, 0.1)`;
+
+            // Add alternating colors to table rows
+            return html.replace(/<table>/g, `<table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:${settings.fontSize - 1}px;">`)
+                .replace(/<thead>/g, '<thead>')
+                .replace(/<th>/g, `<th style="background:${headerBg};font-weight:600;padding:10px 12px;border:1px solid #e8e8e8;text-align:left;">`)
+                .replace(/<\/th>/g, '</th>')
+                .replace(/<tbody>/g, '<tbody>')
+                .replace(/<tr>/g, (match, offset, string) => {
+                    // Check if this is in thead or tbody
+                    const beforeStr = string.substring(0, offset);
+                    const inThead = beforeStr.lastIndexOf('<thead>') > beforeStr.lastIndexOf('</thead>');
+                    if (inThead) return match;
+                    return '<tr>';
+                })
+                .replace(/<td>/g, `<td style="padding:10px 12px;border:1px solid #e8e8e8;">`);
+        }
+
+        // Apply alternating row colors
+        function applyAlternatingRows(container) {
+            const tables = container.querySelectorAll('table');
+            tables.forEach(table => {
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach((row, index) => {
+                    if (index % 2 === 1) {
+                        row.style.background = '#fafafa';
+                    }
+                });
+            });
+        }
+
+        // Hex to RGB
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : { r: 26, g: 115, b: 232 };
+        }
+
+        // Render preview
+        function renderPreview() {
+            const md = editor.value;
+            const theme = themes[settings.theme];
+            const isLight = theme.codeLight;
+
+            // Parse markdown
+            let html = marked.parse(md);
+
+            // Convert highlight.js classes to inline styles
+            html = convertHljsToInline(html, isLight);
+
+            // Process links to footnotes
+            html = processLinksToFootnotes(html);
+
+            // Process tables
+            html = processTable(html);
+
+            // Build font stack
+            const fontFamily = '-apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif';
+            const codeFont = '"SF Mono", "Fira Code", Menlo, Monaco, Consolas, monospace';
+
+            // Wrap with base styles
+            const styledHtml = `
+                <section style="font-family:${fontFamily};font-size:${settings.fontSize}px;line-height:${settings.lineHeight};color:#333333;">
+                    ${html}
+                </section>
+            `;
+
+            preview.innerHTML = styledHtml;
+
+            // Apply inline styles to all elements
+            applyInlineStyles();
+        }
+
+        // Apply inline styles to all elements
+        function applyInlineStyles() {
+            const theme = themes[settings.theme];
+            const isLight = theme.codeLight;
+            const fontFamily = '-apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif';
+            const codeFont = '"SF Mono", "Fira Code", Menlo, Monaco, Consolas, monospace';
+
+            // Headings
+            preview.querySelectorAll('h1').forEach(el => {
+                el.style.cssText = `font-size:22px;font-weight:bold;margin:24px 0 16px;padding-left:12px;border-left:4px solid ${settings.primaryColor};font-family:${fontFamily};color:#1d1d1f;`;
+            });
+
+            preview.querySelectorAll('h2').forEach(el => {
+                el.style.cssText = `font-size:18px;font-weight:bold;margin:20px 0 14px;padding-bottom:8px;border-bottom:2px solid ${settings.primaryColor};font-family:${fontFamily};color:#1d1d1f;`;
+            });
+
+            preview.querySelectorAll('h3').forEach(el => {
+                el.style.cssText = `font-size:16px;font-weight:bold;margin:18px 0 12px;font-family:${fontFamily};color:#1d1d1f;`;
+                el.innerHTML = `<span style="color:${settings.primaryColor};margin-right:8px;">●</span>${el.innerHTML}`;
+            });
+
+            preview.querySelectorAll('h4, h5, h6').forEach(el => {
+                el.style.cssText = `font-size:15px;font-weight:bold;margin:16px 0 10px;font-family:${fontFamily};color:#1d1d1f;`;
+            });
+
+            // Paragraphs
+            preview.querySelectorAll('p').forEach(el => {
+                if (!el.closest('blockquote') && !el.parentElement.matches('[style*="margin-top:32px"]')) {
+                    el.style.cssText = `margin:16px 0;font-size:${settings.fontSize}px;line-height:${settings.lineHeight};color:#333333;`;
+                }
+            });
+
+            // Blockquotes
+            preview.querySelectorAll('blockquote').forEach(el => {
+                el.style.cssText = `margin:16px 0;padding:12px 16px;background:#f7f7f7;border-left:3px solid ${settings.primaryColor};font-size:14px;color:#666666;`;
+                el.querySelectorAll('p').forEach(p => {
+                    p.style.cssText = `margin:0;font-size:14px;line-height:${settings.lineHeight};color:#666666;`;
+                });
+            });
+
+            // Code blocks
+            preview.querySelectorAll('pre').forEach(el => {
+                el.style.cssText = `margin:16px 0;padding:16px;background:${theme.codeBg};border-radius:8px;overflow-x:auto;`;
+                const code = el.querySelector('code');
+                if (code) {
+                    code.style.cssText = `font-family:${codeFont};font-size:13px;line-height:1.5;color:${theme.codeText};background:transparent;padding:0;`;
+                }
+            });
+
+            // Inline code
+            preview.querySelectorAll('code').forEach(el => {
+                if (!el.parentElement.matches('pre')) {
+                    el.style.cssText = `background:#fff5f5;color:#ff502c;padding:2px 6px;border-radius:3px;font-family:${codeFont};font-size:90%;`;
+                }
+            });
+
+            // Lists
+            preview.querySelectorAll('ul').forEach(el => {
+                el.style.cssText = `margin:16px 0;padding-left:24px;font-size:${settings.fontSize}px;line-height:${settings.lineHeight};color:#333333;`;
+            });
+
+            preview.querySelectorAll('ol').forEach(el => {
+                el.style.cssText = `margin:16px 0;padding-left:24px;font-size:${settings.fontSize}px;line-height:${settings.lineHeight};color:#333333;`;
+            });
+
+            preview.querySelectorAll('li').forEach(el => {
+                el.style.cssText = `margin:8px 0;font-size:${settings.fontSize}px;line-height:${settings.lineHeight};color:#333333;`;
+            });
+
+            // Task lists
+            preview.querySelectorAll('input[type="checkbox"]').forEach(el => {
+                el.style.cssText = `margin-right:8px;vertical-align:middle;`;
+            });
+
+            // Strong and em
+            preview.querySelectorAll('strong').forEach(el => {
+                el.style.cssText = `font-weight:bold;color:#1d1d1f;`;
+            });
+
+            preview.querySelectorAll('em').forEach(el => {
+                el.style.cssText = `font-style:italic;`;
+            });
+
+            // Images
+            preview.querySelectorAll('img').forEach(el => {
+                el.style.cssText = `display:block;max-width:100%;margin:16px auto;border-radius:4px;`;
+            });
+
+            // Horizontal rules
+            preview.querySelectorAll('hr').forEach(el => {
+                el.style.cssText = `border:none;margin:24px 0;text-align:center;`;
+                el.innerHTML = '<span style="color:#ccc;letter-spacing:8px;">· · ·</span>';
+            });
+
+            // Apply alternating row colors to tables
+            applyAlternatingRows(preview);
+        }
+
+        // Show toast message
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Copy to clipboard
+        async function copyToClipboard() {
+            const content = preview.innerHTML;
+
+            try {
+                // Create a temporary element
+                const temp = document.createElement('div');
+                temp.innerHTML = content;
+                temp.style.position = 'absolute';
+                temp.style.left = '-9999px';
+                document.body.appendChild(temp);
+
+                // Select the content
+                const range = document.createRange();
+                range.selectNodeContents(temp);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+
+                // Copy
+                document.execCommand('copy');
+
+                // Clean up
+                selection.removeAllRanges();
+                document.body.removeChild(temp);
+
+                showToast('复制成功！可直接粘贴到公众号编辑器');
+            } catch (err) {
+                // Fallback: copy as HTML text
+                try {
+                    await navigator.clipboard.writeText(content);
+                    showToast('已复制 HTML 代码');
+                } catch (e) {
+                    showToast('复制失败，请手动复制');
+                }
+            }
+        }
+
+        // Handle file upload
+        function handleFile(file) {
+            if (!file || !file.name.match(/\.(md|markdown|txt)$/i)) {
+                showToast('请上传 .md 文件');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                editor.value = e.target.result;
+                updateLineNumbers();
+                renderPreview();
+                showToast(`已加载: ${file.name}`);
+            };
+            reader.readAsText(file);
+        }
+
+        // Event listeners
+        editor.addEventListener('input', () => {
+            updateLineNumbers();
+            renderPreview();
+        });
+
+        editor.addEventListener('scroll', () => {
+            lineNumbers.scrollTop = editor.scrollTop;
+        });
+
+        themeSelect.addEventListener('change', (e) => {
+            settings.theme = e.target.value;
+            const theme = themes[settings.theme];
+            settings.primaryColor = theme.primary;
+            colorPicker.value = theme.primary;
+            document.documentElement.style.setProperty('--primary-color', theme.primary);
+            renderPreview();
+        });
+
+        fontSizeSelect.addEventListener('change', (e) => {
+            settings.fontSize = parseInt(e.target.value);
+            renderPreview();
+        });
+
+        lineHeightSelect.addEventListener('change', (e) => {
+            settings.lineHeight = parseFloat(e.target.value);
+            renderPreview();
+        });
+
+        colorPicker.addEventListener('input', (e) => {
+            settings.primaryColor = e.target.value;
+            renderPreview();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFile(e.target.files[0]);
+        });
+
+        copyBtn.addEventListener('click', copyToClipboard);
+
+        // Drag and drop
+        editorContainer.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('active');
+        });
+
+        editorContainer.addEventListener('dragleave', (e) => {
+            if (!editorContainer.contains(e.relatedTarget)) {
+                dropZone.classList.remove('active');
+            }
+        });
+
+        editorContainer.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('active');
+            handleFile(e.dataTransfer.files[0]);
+        });
+
+        // Prevent default drag behavior on window
+        window.addEventListener('dragover', (e) => e.preventDefault());
+        window.addEventListener('drop', (e) => e.preventDefault());
+
+        // Initial render
+        updateLineNumbers();
+
+        // Load sample content if editor has placeholder
+        if (editor.placeholder) {
+            const sample = `# Markdown 转公众号排版工具
+
+这是一个将 Markdown 转换为微信公众号兼容格式的工具。所有样式都会自动转换为内联样式，确保粘贴到公众号编辑器后样式不丢失。
+
+## 功能特点
+
+- **实时预览**：编辑即可看到效果
+- **一键复制**：复制后直接粘贴到公众号
+- **多种主题**：5 套精心设计的主题
+- **自定义**：可调整字号、行高、主色
+
+## 代码示例
+
+\`\`\`javascript
+function greet(name) {
+    console.log(\`Hello, \${name}!\`);
+}
+
+greet('World');
+\`\`\`
+
+行内代码示例：\`const x = 42;\`
+
+## 引用
+
+> 人生苦短，我用 Python。
+> —— 某位程序员
+
+## 表格
+
+| 功能 | 状态 | 备注 |
+|------|------|------|
+| Markdown 解析 | ✅ | 支持 GFM |
+| 代码高亮 | ✅ | 多语言支持 |
+| 主题切换 | ✅ | 5 套主题 |
+
+## 列表
+
+1. 第一步：输入或上传 Markdown
+2. 第二步：选择喜欢的主题
+3. 第三步：点击复制按钮
+4. 第四步：粘贴到公众号编辑器
+
+---
+
+## 链接处理
+
+文中的链接会自动转换为脚注，例如访问 [Google](https://google.com) 或 [GitHub](https://github.com) 会在文末显示参考链接。
+
+---
+
+*感谢使用本工具！*`;
+
+            editor.value = sample;
+            updateLineNumbers();
+            renderPreview();
+        }
+    </script>
+</body>
+</html>
