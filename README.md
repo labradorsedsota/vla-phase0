@@ -53,11 +53,11 @@ Phase 0 目标：2 个 A 类应用，跑通全流程，采集 20-30 条高质量
 
 | 阶段 | 内容 | 状态 |
 |------|------|------|
-| Day 1 上午 | AI 并行：PRD + 应用开发 + mano-cua 实测 | 进行中 |
-| Day 1 下午 | 人工审核 AI 产出质量 | 待开始 |
-| Day 2 上午 | mano-cua 采集轨迹数据 | 待开始 |
-| Day 2 下午 ~ Day 3 | 人工 Ground Truth 标注 | 待开始 |
-| Day 3 下午 | Phase 0 评估报告 + 数据打包 | 待开始 |
+| Day 1 (3/30) | PRD + 应用开发 + mano-cua 实测 | ✅ 完成 |
+| Day 2 (3/31) | md2wechat Golden 采集 + TripSplit 开发 | ✅ 完成 |
+| Day 3 | md2wechat Buggy 采集 + TripSplit 采集 | 待开始 |
+| Day 3~4 | 人工 Ground Truth 标注 | 待开始 |
+| Day 4 | Phase 0 评估报告 + 数据打包 | 待开始 |
 
 ## 文档结构
 
