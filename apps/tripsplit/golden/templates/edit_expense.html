@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}编辑消费 — {{ trip.name }}{% endblock %}
+{% block content %}
+<div class="nav">
+  <a href="{{ url_for('expense_list', trip_id=trip.id) }}">← 返回账单</a>
+</div>
+
+<h1 class="page-title">编辑消费</h1>
+
+{% set exp_participants = expense.participants | tojson | default('[]') %}
+
+<div class="card">
+  <form method="POST" id="editForm">
+    <div class="form-group">
+      <label>分类</label>
+      <select name="category">
+        {% for c in categories %}
+        <option value="{{ c }}" {{ 'selected' if expense.category == c }}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>金额（元）</label>
+      <input type="number" name="amount" step="0.01" min="0.01"
+             value="{{ expense.amount|yuan }}" required>
+    </div>
+
+    <div class="form-group">
+      <label>日期</label>
+      <input type="date" name="date" value="{{ expense.date }}">
+    </div>
+
+    <div class="form-group">
+      <label>付款人</label>
+      <select name="payer">
+        {% for m in members %}
+        <option value="{{ m }}" {{ 'selected' if expense.payer == m }}>{{ m }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>参与人</label>
+      <div class="checkbox-group">
+        {% set parts = expense.participants | tojson %}
+        {% for m in members %}
+        <label>
+          <input type="checkbox" name="participants" value="{{ m }}"
+                 {{ 'checked' if m in parts }}>
+          {{ m }}
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>分摊方式</label>
+      <div class="radio-pills">
+        {% for k, v in split_modes.items() %}
+        <label>
+          <input type="radio" name="split_mode" value="{{ k }}"
+                 {{ 'checked' if expense.split_mode == k }}>
+          <span>{{ v }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="split-inputs" id="ratioInputs"
+         style="display:{{ 'block' if expense.split_mode == 'ratio' else 'none' }};">
+      <div class="form-group">
+        <label>比例设置</label>
+        {% for m in members %}
+        <div class="split-input-row">
+          <span class="name">{{ m }}</span>
+          <input type="number" name="ratio_{{ m }}" value="1" min="0" step="0.1">
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="split-inputs" id="customInputs"
+         style="display:{{ 'block' if expense.split_mode == 'custom' else 'none' }};">
+      <div class="form-group">
+        <label>自定义金额（元）</label>
+        {% for m in members %}
+        <div class="split-input-row">
+          <span class="name">{{ m }}</span>
+          <input type="number" name="custom_{{ m }}" value="0" min="0" step="0.01">
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>备注</label>
+      <textarea name="note">{{ expense.note }}</textarea>
+    </div>
+
+    <button type="submit" class="btn btn-block">保存修改</button>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('input[name="split_mode"]').forEach(r => {
+  r.addEventListener('change', () => {
+    document.getElementById('ratioInputs').style.display = r.value === 'ratio' ? 'block' : 'none';
+    document.getElementById('customInputs').style.display = r.value === 'custom' ? 'block' : 'none';
+  });
+});
+</script>
+{% endblock %}
