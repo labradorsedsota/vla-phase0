@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}分账结算 — {{ trip.name }}{% endblock %}
+{% block content %}
+<div class="nav">
+  <a href="{{ url_for('index') }}">← 首页</a>
+  <a href="{{ url_for('add_expense', trip_id=trip.id) }}">记一笔</a>
+  <a href="{{ url_for('expense_list', trip_id=trip.id) }}">账单明细</a>
+  <a href="{{ url_for('settle', trip_id=trip.id) }}" class="active">分账结算</a>
+</div>
+
+<h1 class="page-title">分账结算</h1>
+<p class="page-subtitle">{{ trip.name }} · 总消费 ¥{{ grand_total|yuan }}</p>
+
+<!-- 个人汇总 -->
+<div class="card">
+  <div class="card-title">个人汇总</div>
+  {% for p in person_summary %}
+  <div class="person-row">
+    <div>
+      <div style="font-weight:600;">{{ p.name }}</div>
+      <div style="font-size:13px;color:var(--text-secondary);">
+        实付 ¥{{ p.paid|yuan }} · 应付 ¥{{ p.owed|yuan }}
+      </div>
+    </div>
+    <div class="{{ 'balance-positive' if p.balance >= 0 else 'balance-negative' }}">
+      {% if p.balance > 0 %}
+        +¥{{ p.balance|yuan }}
+      {% elif p.balance < 0 %}
+        -¥{{ (-p.balance)|yuan }}
+      {% else %}
+        ¥0.00
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- 结算方案 -->
+<div class="card">
+  <div class="card-title">💸 结算方案</div>
+  {% if settlements %}
+    <div style="margin-top:12px;">
+    {% for s in settlements %}
+    <div class="transfer-item">
+      <span>{{ s.from }}</span>
+      <span class="transfer-arrow">→</span>
+      <span>{{ s.to }}</span>
+      <span class="transfer-amount">¥{{ s.amount|yuan }}</span>
+    </div>
+    {% endfor %}
+    </div>
+    <div style="font-size:13px;color:var(--text-secondary);margin-top:8px;">
+      共 {{ settlements|length }} 笔转账即可完成结算
+    </div>
+  {% else %}
+    <div class="empty">所有人已结清，无需转账 🎉</div>
+  {% endif %}
+</div>
+
+<!-- 分类统计 -->
+{% if cat_stats %}
+<div class="card">
+  <div class="card-title">📊 分类统计</div>
+  <div style="margin-top:12px;">
+  {% for s in cat_stats %}
+  <div class="stat-bar">
+    <span class="stat-name">{{ s.category }}</span>
+    <div class="stat-fill-wrap">
+      <div class="stat-fill" style="width:{{ s.percent }}%"></div>
+    </div>
+    <span class="stat-val">¥{{ s.amount|yuan }} ({{ s.percent }}%)</span>
+  </div>
+  {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}
