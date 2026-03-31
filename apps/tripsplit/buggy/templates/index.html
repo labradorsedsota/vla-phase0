@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}TripSplit — 旅行分账{% endblock %}
+{% block content %}
+<h1 class="page-title">🧳 TripSplit</h1>
+<p class="page-subtitle">旅行分账记账本</p>
+
+<!-- 创建旅行 -->
+<div class="card">
+  <div class="card-title">创建新旅行</div>
+  <form method="POST" action="{{ url_for('create_trip') }}" style="margin-top:12px;">
+    <div class="form-group">
+      <label>旅行名称</label>
+      <input type="text" name="name" placeholder="例：清迈五日游" required>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <div class="form-group" style="flex:1;">
+        <label>开始日期</label>
+        <input type="date" name="start_date">
+      </div>
+      <div class="form-group" style="flex:1;">
+        <label>结束日期</label>
+        <input type="date" name="end_date">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>同行人（逗号分隔）</label>
+      <input type="text" name="members" placeholder="例：小明, 小红, 小刚" required>
+    </div>
+    <button type="submit" class="btn btn-block">创建旅行</button>
+  </form>
+</div>
+
+<!-- 旅行列表 -->
+{% if trips %}
+  {% for t in trips %}
+  <div class="card">
+    <a href="{{ url_for('expense_list', trip_id=t.id) }}">
+      <div class="card-title">{{ t.name }}</div>
+      <div class="card-meta">
+        {% if t.start_date %}{{ t.start_date }}{% endif %}
+        {% if t.end_date %} — {{ t.end_date }}{% endif %}
+        · {{ t.member_count }} 人
+      </div>
+      <div class="card-amount">¥{{ t.total|yuan }}</div>
+    </a>
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="empty">还没有旅行，创建一个开始记账吧 ✈️</div>
+{% endif %}
+{% endblock %}
