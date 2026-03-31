@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}账单明细 — {{ trip.name }}{% endblock %}
+{% block content %}
+<div class="nav">
+  <a href="{{ url_for('index') }}">← 首页</a>
+  <a href="{{ url_for('add_expense', trip_id=trip.id) }}">记一笔</a>
+  <a href="{{ url_for('expense_list', trip_id=trip.id) }}" class="active">账单明细</a>
+  <a href="{{ url_for('settle', trip_id=trip.id) }}">分账结算</a>
+</div>
+
+<h1 class="page-title">账单明细</h1>
+<p class="page-subtitle">{{ trip.name }}</p>
+
+<!-- 汇总 -->
+<div class="summary-bar">
+  <span>共 <strong>{{ count }}</strong> 笔</span>
+  <span>合计 <strong>¥{{ total|yuan }}</strong></span>
+</div>
+
+<!-- 分类筛选 -->
+<div class="filter-pills">
+  <a href="{{ url_for('expense_list', trip_id=trip.id) }}" class="{{ 'active' if not category_filter }}">全部</a>
+  {% for c in categories %}
+  <a href="{{ url_for('expense_list', trip_id=trip.id, category=c) }}"
+     class="{{ 'active' if category_filter == c }}">{{ c }}</a>
+  {% endfor %}
+</div>
+
+<!-- 消费列表 -->
+<div class="card">
+  {% if expenses %}
+    {% for e in expenses %}
+    <div class="expense-item">
+      <div class="expense-info">
+        <div>
+          <span class="expense-category">{{ e.category }}</span>
+          {{ e.note or '无备注' }}
+        </div>
+        <div class="expense-detail">
+          {{ e.date }} · {{ e.payer }} 付款
+          · {{ split_modes.get(e.split_mode, e.split_mode) }}
+        </div>
+      </div>
+      <div class="expense-amount">¥{{ e.amount|yuan }}</div>
+      <div class="expense-actions">
+        <a href="{{ url_for('edit_expense', trip_id=trip.id, exp_id=e.id) }}"
+           class="btn btn-small btn-secondary">编辑</a>
+        <form method="POST" action="{{ url_for('delete_expense', trip_id=trip.id, exp_id=e.id) }}"
+              class="confirm-form"
+              onsubmit="return confirm('确认删除这笔消费？')">
+          <button type="submit" class="btn btn-small btn-danger">删除</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty">暂无消费记录</div>
+  {% endif %}
+</div>
+{% endblock %}
