@@ -18,4 +18,4 @@
 - ✅ 文档结构定稿：README / DECISIONS / prds / apps / test / meetings（三方确认）
 - ✅ 存储方案：共享 Git repo（老板确认）
 - ✅ fixtures 从一开始按 App 分子目录（Moss 建议，已采纳）
-- ⏳ L1.5 一键复制验证方式 — mano-cua 能否操作剪贴板待实测，可能需替代验证方案（待品鉴者确认）
+- ✅ L1.5 一键复制验证方式 — mano-cua 可操作剪贴板（点击复制→切换 TextEdit→粘贴验证），已采集通过。跨应用剪贴板无问题，仅拖拽为工具边界（Moss 实测确认，Pichai 关闭 4/1）
