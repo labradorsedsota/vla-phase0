@@ -1,0 +1,9 @@
+Session created: sess-20260401125752-2084bb520b69469ba54caa6c6d790ede
+[STUB] 此文件从采集报告元数据重建，不包含逐步 action/reasoning
+[STUB] 完整操作截图序列存储于 mano-cua 云端
+==================================================
+Test case: L1.3b_text_emphasis
+Description: 文本强调渲染验证（evaluation 标注斜体异常）
+Total steps: 13
+Evaluation: model_failure
+==================================================

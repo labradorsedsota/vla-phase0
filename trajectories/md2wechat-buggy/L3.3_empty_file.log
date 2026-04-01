@@ -1,0 +1,9 @@
+Session created: sess-20260401134647-450087bc25294f8e8e45edcfb22b74d8
+[STUB] 此文件从采集报告元数据重建，不包含逐步 action/reasoning
+[STUB] 完整操作截图序列存储于 mano-cua 云端
+==================================================
+Test case: L3.3_empty_file
+Description: 空文件处理验证
+Total steps: 5
+Evaluation: success
+==================================================

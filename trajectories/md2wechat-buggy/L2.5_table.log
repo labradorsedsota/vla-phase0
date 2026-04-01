@@ -1,0 +1,9 @@
+Session created: sess-20260401132511-47ae6a2db0d541d1abe91bde9db8b23b
+[STUB] 此文件从采集报告元数据重建，不包含逐步 action/reasoning
+[STUB] 完整操作截图序列存储于 mano-cua 云端
+==================================================
+Test case: L2.5_table
+Description: 表格渲染验证 — Bug B2 命中：无隔行变色
+Total steps: 6
+Evaluation: unmatched
+==================================================

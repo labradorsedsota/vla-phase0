@@ -64,5 +64,5 @@
 ## 备注
 
 - 所有 session 截图数据已上传 mano-cua 云端
-- 本地 stdout 日志存于 `/tmp/vla-phase0/trajectories/golden/`
+- 本地 stdout 日志存于 `/tmp/vla-phase0/trajectories/md2wechat-golden/`
 - 另有合并版 session（L2.4+L2.6、L3.2+L3.3）和多次重试 session 共 8 条，已上传但不计入有效轨迹

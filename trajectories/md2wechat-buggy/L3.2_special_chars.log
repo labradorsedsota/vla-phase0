@@ -1,0 +1,9 @@
+Session created: sess-20260401134504-622115188f4d4d679acba31b39901a84
+[STUB] 此文件从采集报告元数据重建，不包含逐步 action/reasoning
+[STUB] 完整操作截图序列存储于 mano-cua 云端
+==================================================
+Test case: L3.2_special_chars
+Description: 特殊字符验证
+Total steps: 5
+Evaluation: success
+==================================================

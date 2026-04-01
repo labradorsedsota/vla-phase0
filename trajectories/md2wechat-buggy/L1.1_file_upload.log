@@ -1,0 +1,9 @@
+Session created: sess-20260401123241-61cee7ce3be9435886f2a52d2dadd1b0
+[STUB] 此文件从采集报告元数据重建，不包含逐步 action/reasoning
+[STUB] 完整操作截图序列存储于 mano-cua 云端
+==================================================
+Test case: L1.1_file_upload
+Description: 文件上传功能验证
+Total steps: 46
+Evaluation: success
+==================================================

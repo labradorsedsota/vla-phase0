@@ -1,0 +1,9 @@
+Session created: sess-20260401135146-e4e52f9c46a84cdaa1dba9b28c95cfb7
+[STUB] 此文件从采集报告元数据重建，不包含逐步 action/reasoning
+[STUB] 完整操作截图序列存储于 mano-cua 云端
+==================================================
+Test case: L3.5_rapid_theme_switch
+Description: 连续主题切换验证 — B3 延伸：5个主题切换后预览不变
+Total steps: 13
+Evaluation: unmatched
+==================================================

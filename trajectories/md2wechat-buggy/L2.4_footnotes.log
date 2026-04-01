@@ -1,0 +1,9 @@
+Session created: sess-20260401131331-0ebdbe7054a4495eb0ae110c1937d28c
+[STUB] 此文件从采集报告元数据重建，不包含逐步 action/reasoning
+[STUB] 完整操作截图序列存储于 mano-cua 云端
+==================================================
+Test case: L2.4_footnotes
+Description: 脚注转换验证 — Bug B1 命中：脚注编号全部显示 [0]
+Total steps: 4
+Evaluation: unmatched
+==================================================

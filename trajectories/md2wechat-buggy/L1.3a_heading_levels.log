@@ -1,0 +1,9 @@
+Session created: sess-20260401125108-968bfcee60034eeea51d3f26c88e13be
+[STUB] 此文件从采集报告元数据重建，不包含逐步 action/reasoning
+[STUB] 完整操作截图序列存储于 mano-cua 云端
+==================================================
+Test case: L1.3a_heading_levels
+Description: 标题层级渲染验证
+Total steps: 26
+Evaluation: success
+==================================================

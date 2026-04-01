@@ -1,0 +1,9 @@
+Session created: sess-20260401130829-ed473824a98f45a78e13b40d4f038bc5
+[STUB] 此文件从采集报告元数据重建，不包含逐步 action/reasoning
+[STUB] 完整操作截图序列存储于 mano-cua 云端
+==================================================
+Test case: L2.2_theme_switch
+Description: 主题切换验证 — Bug B3 命中：标题装饰条颜色不跟随主题变化
+Total steps: 12
+Evaluation: unmatched
+==================================================

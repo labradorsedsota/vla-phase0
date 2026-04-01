@@ -1,0 +1,9 @@
+Session created: sess-20260401141628
+[STUB] 此文件从采集报告元数据重建，不包含逐步 action/reasoning
+[STUB] 完整操作截图序列存储于 mano-cua 云端
+==================================================
+Test case: L1.4_code_highlight
+Description: 代码高亮验证（Buggy 版未破坏此功能）
+Total steps: 6
+Evaluation: success
+==================================================
