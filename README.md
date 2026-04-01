@@ -50,7 +50,7 @@ Phase 0 目标：2 个 A 类应用，跑通全流程，采集 20-30 条高质量
 - **步骤 2/3/4 可并行** — 测试用例生成与应用开发互不依赖
 - **步骤 7 diff 机制** — 同一套用例跑两个版本，Golden pass + Buggy fail 的差异点即 Bug 命中点，自动产出正负样本对
 
-## 当前进度（更新于 2026-04-01）
+## 当前进度（更新于 2026-04-01 18:15）
 
 ### App 1: md2wechat（Markdown 转微信公众号排版）— 集中完成中
 
@@ -75,27 +75,28 @@ Phase 0 目标：2 个 A 类应用，跑通全流程，采集 20-30 条高质量
 | 步骤 | 状态 | 说明 |
 |------|------|------|
 | 1. PRD + L1/L2/L3 | ✅ 完成 | `prds/tripsplit.md`，19 条验收点 |
-| 2. 测试用例生成 | ⏳ 待完成 | Moss 待执行 |
+| 2. 测试用例生成 | ✅ 完成 | Moss 生成 19 条用例，`test/tripsplit-testcases.md` |
 | 3. Golden App | ✅ 完成 | `apps/tripsplit/golden/`（Flask 多文件） |
 | 4. Buggy App | ✅ 完成 | `apps/tripsplit/buggy/`，3 个 bug |
 | 5. Bug 清单提交 | ✅ 完成 | Fabrice 提交 |
 | 6. Bug 清单审核 | ✅ 完成 | 已写入 PRD 末尾（3/31 16:05） |
-| 7. mano-cua 采集 | ⏳ 等步骤 2 | — |
-| 8. Ground Truth 标注 | ⏳ 等步骤 7 | — |
+| 7. mano-cua 采集 | ✅ 完成 | Golden 11 条 + Buggy 3 条，3/3 Bug 命中 |
+| 8. Ground Truth 标注 | ✅ 完成 | `test/reports/tripsplit-ground-truth.md` |
 
-### 下一步
+### Phase 0 评估报告
 
-- **Moss**：对两个应用分别执行步骤 2（生成验收任务和测试数据）
-- 步骤 2 完成后进入步骤 7（mano-cua 采集）
+- ✅ 已提交：`test/reports/phase0-evaluation.md`
+- 50 条轨迹，7 组正负样本对，6/6 Bug 检出率 100%
+- 待补充：TripSplit Buggy 采集覆盖说明 + 「Buggy 但 PASS」标注策略
 
 ## 里程碑
 
 | 阶段 | 内容 | 状态 |
 |------|------|------|
 | Day 1（3/30-31） | PRD × 2 + 应用开发 × 2 + Bug 审核 × 2 | ✅ 完成 |
-| Day 2 | Moss 测试用例 + mano-cua 采集轨迹 | ⏳ 待开始 |
-| Day 2-3 | 人工 Ground Truth 标注 | 待开始 |
-| Day 3 | Phase 0 评估报告 + 数据打包 | 待开始 |
+| Day 2（4/1） | Moss 测试用例 + mano-cua 采集 + Ground Truth 标注 | ✅ 完成 |
+| Day 2（4/1） | Phase 0 评估报告 | ✅ 已提交，待修订 |
+| 待定 | 人工 Ground Truth 复核 + 数据打包交付 | ⏳ 待启动 |
 
 ## 文档结构
 
