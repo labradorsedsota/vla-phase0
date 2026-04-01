@@ -61,8 +61,8 @@ Phase 0 目标：2 个 A 类应用，跑通全流程，采集 20-30 条高质量
 | 4. Buggy App | ✅ 完成 | `apps/md2wechat/buggy.html`，3 个 bug |
 | 5. Bug 清单提交 | ✅ 完成 | Fabrice 提交 |
 | 6. Bug 清单审核 | ✅ 完成 | 已写入 PRD 末尾 |
-| 7. mano-cua 采集 | 🔄 进行中 | Golden 17/19，Buggy 17/17 完成，L1.4 等修复 |
-| 8. Ground Truth 标注 | ⏳ 等步骤 7 | — |
+| 7. mano-cua 采集 | ✅ 完成 | Golden 18/19，Buggy 18/18，共 36 条有效轨迹 |
+| 8. Ground Truth 标注 | 🔄 进行中 | 3 个 Bug 全部命中，Moss 标注中 |
 
 **采集详情：**
 - Golden App：见 `test/reports/md2wechat-golden-collection.md`（17/19 完成）
