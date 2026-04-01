@@ -1,0 +1,47 @@
+2026-03-31 14:23:32.938 Python[45342:6634660] +[IMKClient subclass]: chose IMKClient_Modern
+2026-03-31 14:23:32.938 Python[45342:6634660] +[IMKInputSession subclass]: chose IMKInputSession_Modern
+Session created: sess-20260331142332-4b9b03c17a364694adc37f738cf74dc5
+UI panel initialized successfully
+UI window displayed
+Expected result: None
+[step 0] Action: Initializing
+[step 0] Reasoning: Initializing session connection
+[step 0] Action: screenshot
+[step 0] Reasoning: I'll start by taking a screenshot to see the current state of the screen.
+[step 1] Action: left_click (68, 207)
+[step 1] Reasoning: I can see the md2wechat golden.html page is already open in Chrome. The left editor shows the markdown content and the right panel shows the preview. I need to:
+1. Click at the very beginning of the first line in the left editor (before "# Main Heading Level 1")
+2. Type '# 新增标题测试 '
+3. Press Enter
+
+Let me click at the very beginning of line 1 in the editor, before the `#` character.
+[step 2] Action: key: Home
+[step 2] Reasoning: I can see the cursor is now in line 1. I need to make sure I'm at the very beginning of the line. Let me press the Home key to ensure I'm at the start of the line, then use Ctrl+A won't work here. Let me press the Home key to go to the beginning of line 1.
+[step 3] Action: type: # 新增标题测试 
+
+[step 3] Reasoning: Good, the cursor should now be at the beginning of line 1. Now I'll type '# 新增标题测试 ' and press Enter. This will insert the new heading at the top of the document.
+[step 4] Action: DONE
+[step 4] Reasoning: The task has been completed successfully. Here's what happened:
+
+1. **Left Editor**: Line 1 now shows `# 新增标题测试` (with a trailing space), followed by the original content starting at line 2 with `# Main Heading Level 1`.
+
+2. **Right Preview Panel**: The preview has **immediately updated** to show the new heading `新增标题测试` at the very top of the preview, rendered as a styled heading (matching the blue-bordered h1 style of the theme). Below it, the original `Main Heading Level 1` heading appears as expected.
+
+The right preview panel updated in real-time to reflect the new heading `# 新增标题测试` at the top, confirming that the live preview functionality works correctly.
+
+==================================================
+Task: On the md2wechat golden.html page in Chrome, click at the beginning of the first line in the left editor, type '# 新增标题测试 ' and press Enter. Verify the right preview panel immediately updates to show the new heading at the top.
+Status: COMPLETED
+Total steps: 4
+Last action: DONE
+Last reasoning: The task has been completed successfully. Here's what happened:
+
+1. **Left Editor**: Line 1 now shows `# 新增标题测试` (with a trailing space), followed by the original content starting at line 2 with `# Main Heading Level 1`.
+
+2. **Right Preview Panel**: The preview has **immediately updated** to show the new heading `新增标题测试` at the very top of the preview, rendered as a styled heading (matching the blue-bordered h1 style of the theme). Below it, the original `Main Heading Level 1` heading appears as expected.
+
+The right preview panel updated in real-time to reflect the new heading `# 新增标题测试` at the top, confirming that the live preview functionality works correctly.
+
+==================================================
+
+UI window closed
