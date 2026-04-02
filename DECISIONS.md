@@ -19,3 +19,7 @@
 - ✅ 存储方案：共享 Git repo（老板确认）
 - ✅ fixtures 从一开始按 App 分子目录（Moss 建议，已采纳）
 - ✅ L1.5 一键复制验证方式 — mano-cua 可操作剪贴板（点击复制→切换 TextEdit→粘贴验证），已采集通过。跨应用剪贴板无问题，仅拖拽为工具边界（Moss 实测确认，Pichai 关闭 4/1）
+
+## 2026-04-02
+
+- ✅ 采集 SOP 改进：所有 mano-cua 执行必须使用 `tee` 保存 stdout 日志到 .log 文件。原因：md2wechat Buggy 采集时未做 stdout 重定向，导致本地 18 条轨迹的逐步操作日志永久丢失（仅存 [STUB] 元数据存根）。mano-cua 无 session 历史导出功能，不可事后补全。TripSplit 采集已执行此规则。Phase 1 起为强制要求。（Pichai 记录，4/2）

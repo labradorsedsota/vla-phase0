@@ -61,6 +61,22 @@
 | L3.4 响应式布局 | 12 | — |
 | L3.5 主题连切 | — | 异常标注（B3 延伸） |
 
+## ⚠️ 已知缺陷：本地逐步操作日志缺失
+
+**问题：** md2wechat Buggy 采集时，mano-cua 的 stdout 日志未做重定向保存。本地 `trajectories/md2wechat-buggy/` 下只有 18 个存根文件（含 session ID、用例名、步数、evaluation 结果），不包含逐步 action/reasoning 交互日志。
+
+**根因：** 早期采集流程直接运行 mano-cua 命令，输出打在终端，未使用 `tee` 或 `>` 将 stdout 重定向到 .log 文件。session 截图上传到 mano-cua 云端，但本地没有保存逐步操作记录。
+
+**影响范围：**
+- md2wechat Golden：26 个 .log 文件 ✅（采集时做了日志保存）
+- md2wechat Buggy：0 个完整 .log 文件 ❌（18 个 [STUB] 存根，仅含元数据）
+- TripSplit Golden：13 个 .log 文件 ✅（吸取教训后统一 tee 保存）
+- TripSplit Buggy：3 个 .log 文件 ✅（同上）
+
+**不可逆性：** mano-cua 无 session 历史导出功能，无法从云端重建逐步操作日志。云端截图序列仍在，session ID 可追溯，但本地交互日志永久缺失。
+
+**改进措施：** Phase 1 采集 SOP 必须加入：**所有 mano-cua 执行必须 `tee` 保存 stdout 日志**，避免重蹈覆辙。（已在 TripSplit 采集中执行）
+
 ## 备注
 
 - 所有 session 截图数据已上传 mano-cua 云端

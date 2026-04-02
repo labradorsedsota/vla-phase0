@@ -69,6 +69,7 @@ Phase 0 目标：2 个 A 类应用，跑通全流程，采集 20-30 条高质量
 - Buggy App：见 `test/reports/md2wechat-buggy-collection.md`（17/17 完成，3 个 Bug 全部捕获）
 - L2.1 拖拽上传：标记工具不可采集（mano-cua 无法跨应用拖拽）
 - L1.4 代码高亮：等 Fabrice 修复 marked.js 后补采
+- ⚠️ **Buggy 本地日志缺失：** 采集时未做 stdout 重定向，18 条轨迹仅有 [STUB] 元数据存根，逐步操作日志不可恢复。详见采集报告。
 
 ### App 2: tripsplit（旅行分账记账本）
 
