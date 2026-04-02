@@ -184,6 +184,13 @@ Buggy App 在 Golden 基础上植入 3 个 Bug，预期 B1/B2/B3 关联测试点
 
 **根因**：MOSS 在汇总判定时未对 mano-cua 的 thinking 观测与最终结论做交叉校验。已补充判定规则：当 mano-cua 观测记录中出现明确失败描述时，判定不得为 PASS，除非有合理解释。
 
+**额外识别的流程缺陷：**
+- **页面状态未重置**：每次 mano-cua session 启动时未重新加载目标页面，新任务在上一个 session 的残留状态上执行，导致部分 session 步数异常高（agent 需额外步骤清理残留），并可能影响观测结果的可靠性
+- **测试对象 URL 未强制校验**：L3.4 重采时 mano-cua 自行导航到 md2wechat.cn 而非本地 Golden App，未被及时拦截
+- **Buggy App 日志全为 STUB**：md2wechat Buggy 全部 18 条轨迹的本地日志仅含元数据，完整数据仅存于 mano-cua 云端，不可本地审计
+
+**流程改进**：已制定《mano-cua 测试执行规范 v1.0》（`docs/mano-cua-execution-spec.md`），涵盖 Pre-flight / In-flight / Post-flight 共 11 条强制校验条款，后续所有测试执行必须遵守。
+
 ---
 
 ## 11. 下一步
