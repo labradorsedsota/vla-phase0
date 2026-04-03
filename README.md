@@ -42,7 +42,7 @@ Phase 0 目标：2 个 A 类应用，跑通全流程，采集 20-30 条高质量
 步骤 7: mano-cua 用同一套测试用例分别跑 Golden 和 Buggy
 ```
 
-> Ground Truth 标注由 Mano 团队负责，不在本工作流范围内。
+> Ground Truth 标注由智子负责，不在本工作流范围内。
 
 ### ⚠️ 关键约束
 
