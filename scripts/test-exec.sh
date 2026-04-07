@@ -201,91 +201,39 @@ if [[ "$CONSISTENCY_CHECK" == "PASS" ]]; then
   echo -e "${GREEN}[OK] observation 与 verdict 逻辑一致。${NC}"
 fi
 
-# ── 规则 3：verdict 与 expected-result 交叉校验 ──
+# ── 规则 3：verdict 与 expected-result 交叉校验（LLM 语义判定） ──
 CROSS_CHECK="PASS"
 CROSS_DETAIL=""
 
-# 将 expected-result 拆分为逐条检查
-# expected-result 格式通常为 "1. xxx；2. yyy；3. zzz" 或 "1. xxx; 2. yyy"
-IFS=$'\n' read -r -d '' -a ER_ITEMS < <(echo "$EXPECTED_RESULT" | sed 's/；/\n/g; s/; /\n/g' | sed 's/^[0-9]*\. *//' | grep -v '^$' && printf '\0') || true
-
-ER_TOTAL=${#ER_ITEMS[@]}
-ER_MATCHED=0
-ER_UNMATCHED=()
-
-_do_cross_check() {
-  # 使用 python3 做交叉校验（避免 macOS sed/grep 兼容问题）
-  # 输入：expected-result 全文 + reasoning 文件路径
-  # 输出：matched_count total_count unmatched_items（JSON）
-  local er_text="$1"
-  local reasoning_file="$2"
-  
-  python3 -c "
-import re, json, sys
-
-with open('$reasoning_file') as f:
-    reasoning = f.read()
-
-er_text = sys.stdin.read().strip()
-items = [i.strip() for i in re.split(r'[；;]', er_text) if i.strip()]
-items = [re.sub(r'^\d+\.\s*', '', i) for i in items]
-
-matched = 0
-unmatched = []
-
-for item in items:
-    hit = False
-    
-    # 方法1：直接子串匹配（去掉标点后的短片段）
-    fragments = re.split(r'[，。；：、！？\"\"\'\'\s]+', item)
-    for f in fragments:
-        if 4 <= len(f) <= 8 and f in reasoning:
-            hit = True
-            break
-    
-    # 方法2：中文 n-gram 匹配（trigram + bigram），40% 阈值
-    if not hit:
-        raw_phrases = re.findall(r'[\u4e00-\u9fff]+', item)
-        ngrams = set()
-        for rp in raw_phrases:
-            for n in [3, 2]:
-                for i in range(len(rp) - n + 1):
-                    ngrams.add(rp[i:i+n])
-        if ngrams:
-            m = sum(1 for ng in ngrams if ng in reasoning)
-            if m / len(ngrams) >= 0.40:
-                hit = True
-    
-    if hit:
-        matched += 1
-    else:
-        unmatched.append(item)
-
-result = {
-    'matched': matched,
-    'total': len(items),
-    'unmatched': unmatched
-}
-print(json.dumps(result, ensure_ascii=False))
-" <<< "$er_text"
-}
-
-# 将 LAST_REASONING 写入临时文件（避免 shell 转义问题）
+# 将 LAST_REASONING 写入临时文件
 REASONING_TMPFILE=$(mktemp)
 echo "$LAST_REASONING" > "$REASONING_TMPFILE"
 
-CROSS_RESULT=$(_do_cross_check "$EXPECTED_RESULT" "$REASONING_TMPFILE")
-rm -f "$REASONING_TMPFILE"
+# 获取脚本所在目录
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-ER_MATCHED=$(echo "$CROSS_RESULT" | python3 -c "import sys,json; print(json.loads(sys.stdin.read())['matched'])")
-ER_TOTAL=$(echo "$CROSS_RESULT" | python3 -c "import sys,json; print(json.loads(sys.stdin.read())['total'])")
-ER_UNMATCHED_JSON=$(echo "$CROSS_RESULT" | python3 -c "import sys,json; r=json.loads(sys.stdin.read()); [print(u) for u in r['unmatched']]")
+# 调用 verdict_check.py（LLM 优先，自动 fallback 到 n-gram）
+CROSS_RESULT=$(python3 "${SCRIPT_DIR}/verdict_check.py" \
+  --expected-result "$EXPECTED_RESULT" \
+  --verdict-file "$REASONING_TMPFILE" \
+  --method llm 2>/dev/null)
 
-# 将未匹配项读入数组
+CROSS_METHOD=$(echo "$CROSS_RESULT" | python3 -c "import sys,json; print(json.loads(sys.stdin.read()).get('method','unknown'))" 2>/dev/null || echo "unknown")
+ER_MATCHED=$(echo "$CROSS_RESULT" | python3 -c "import sys,json; print(json.loads(sys.stdin.read()).get('matched',0))" 2>/dev/null || echo "0")
+ER_TOTAL=$(echo "$CROSS_RESULT" | python3 -c "import sys,json; print(json.loads(sys.stdin.read()).get('total',0))" 2>/dev/null || echo "0")
+
+# 提取未匹配项
 ER_UNMATCHED=()
 while IFS= read -r line; do
   [[ -n "$line" ]] && ER_UNMATCHED+=("$line")
-done <<< "$ER_UNMATCHED_JSON"
+done < <(echo "$CROSS_RESULT" | python3 -c "import sys,json; [print(u) for u in json.loads(sys.stdin.read()).get('unmatched',[])]" 2>/dev/null)
+
+# 提取每条的判定理由（用于报告）
+CROSS_ITEMS_JSON=$(echo "$CROSS_RESULT" | python3 -c "import sys,json; print(json.dumps(json.loads(sys.stdin.read()).get('items',[]),ensure_ascii=False))" 2>/dev/null || echo "[]")
+
+rm -f "$REASONING_TMPFILE"
+
+echo -e "  Cross-check method: ${BOLD}${CROSS_METHOD}${NC}"
 
 if [[ ${#ER_UNMATCHED[@]} -gt 0 ]]; then
   CROSS_CHECK="REVIEW_REQUIRED"
@@ -350,7 +298,9 @@ report = {
         'consistency': '${CONSISTENCY_CHECK}',
         'consistency_detail': $(echo "$CONSISTENCY_DETAIL" | python3 -c "import sys,json; print(json.dumps(sys.stdin.read().strip()))") or None,
         'cross_check': '${CROSS_CHECK}',
+        'cross_check_method': '${CROSS_METHOD}',
         'cross_check_detail': $(echo "$CROSS_DETAIL" | python3 -c "import sys,json; print(json.dumps(sys.stdin.read().strip()))") or None,
+        'cross_check_items': json.loads('''${CROSS_ITEMS_JSON}''') if '''${CROSS_ITEMS_JSON}''' != '[]' else [],
         'er_matched': ${ER_MATCHED},
         'er_total': ${ER_TOTAL},
     },
